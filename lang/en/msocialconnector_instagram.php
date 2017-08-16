@@ -27,11 +27,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-$string['pluginname'] = 'instagram Connector';
-$string['igsearch'] = 'Search string to search for in instagram';
+$string['pluginname'] = 'Instagram Connector';
+$string['igsearch'] = 'String to search for in Instagram Tags';
 $string['igsearch_empty'] = 'Search term absent. Configure it in this activity settings.';
-$string['igsearch_help'] = 'It can be any string as specified in instagram search API. You can use this reference to find out how to compose your search string <a href="https://developers.instagram.com/docs/graph-api/using-graph-api/v1.0#searchtypes">https://developers.instagram.com/docs/graph-api/using-graph-api/v1.0#searchtypes</a>';
-$string['igsearchingby'] = 'Searching for term: "{$a}"';
+$string['igsearch_help'] = 'If specified, only media published with the specific tag is collected for analysis.';
+$string['igsearchingby'] = 'Searching for tag: "{$a}"';
 $string['harvest'] = 'Search instagram groups for student activity';
 
 $string['no_instagram_name_advice'] = 'Unlinked from instagram.';

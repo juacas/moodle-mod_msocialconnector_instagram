@@ -30,6 +30,7 @@ use instagram\GraphNodes\GraphEdge;
 use instagram\GraphNodes\GraphNode;
 use mod_msocial\pki_info;
 use msocial\msocial_plugin;
+use mod_msocial\social_user;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -119,9 +120,33 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see \msocial\msocial_plugin::get_settings() */
+    public function get_settings(\MoodleQuickForm $mform) {
+        $formfieldname = $this->get_form_field_name(self::CONFIG_IGSEARCH);
+        $mform->addElement('text', $formfieldname, get_string("igsearch", "msocialconnector_instagram"), array('size' => '20'));
+        $mform->setType($formfieldname, PARAM_TEXT);
+        $mform->addHelpButton($formfieldname, 'igsearch', 'msocialconnector_instagram');
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see \msocial\msocial_plugin::data_preprocessing() */
+    public function data_preprocessing(&$defaultvalues) {
+        $defaultvalues[$this->get_form_field_name(self::CONFIG_IGSEARCH)] = $this->get_config(self::CONFIG_IGSEARCH);
+        parent::data_preprocessing($defaultvalues);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see \msocial\msocial_plugin::save_settings() */
     public function save_settings(\stdClass $data) {
         if (isset($data->{$this->get_form_field_name(self::CONFIG_IGSEARCH)})) {
-            $this->set_config('igsearch', $data->{$this->get_form_field_name(self::CONFIG_IGSEARCH)});
+            $this->set_config(self::CONFIG_IGSEARCH, $data->{$this->get_form_field_name(self::CONFIG_IGSEARCH)});
         }
         return true;
     }
@@ -260,7 +285,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         return $link;
     }
 
-    public function get_social_user_url($userid) {
+    public function get_social_user_url(social_user $userid) {
         return "https://www.instagram.com/$userid->socialname";
     }
 
@@ -284,39 +309,19 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      *
      * @see \msocial\msocial_plugin::get_pki_list() */
     public function get_pki_list() {
-        if ($this->mode == self::MODE_USER) {
-            $pkiobjs['igposts'] = new pki_info('igposts', null, pki_info::PKI_INDIVIDUAL, social_interaction::POST, 'POST',
-                    social_interaction::DIRECTION_AUTHOR);
-            $pkiobjs['igreplies'] = new pki_info('igreplies', null, pki_info::PKI_CUSTOM, social_interaction::REPLY, '*',
-                    social_interaction::DIRECTION_RECIPIENT);
-            $pkiobjs['iglikes'] = new pki_info('iglikes', null, pki_info::PKI_CUSTOM, social_interaction::REACTION,
-                    'nativetype = "LIKE"', social_interaction::DIRECTION_RECIPIENT);
-            $pkiobjs['max_igposts'] = new pki_info('max_posts', null, pki_info::PKI_AGREGATED);
-            $pkiobjs['max_igreplies'] = new pki_info('max_replies', null, pki_info::PKI_CUSTOM);
-            $pkiobjs['max_iglikes'] = new pki_info('max_likes', null, pki_info::PKI_CUSTOM);
-        } else {
-            $pkiobjs['igposts'] = new pki_info('igposts', null, pki_info::PKI_INDIVIDUAL, social_interaction::POST, 'POST',
-                    social_interaction::DIRECTION_AUTHOR);
-            $pkiobjs['igreplies'] = new pki_info('igreplies', null, pki_info::PKI_INDIVIDUAL, social_interaction::REPLY, '*',
-                    social_interaction::DIRECTION_RECIPIENT);
-            $pkiobjs['iglikes'] = new pki_info('iglikes', null, pki_info::PKI_INDIVIDUAL, social_interaction::REACTION,
-                    'nativetype = "LIKE"', social_interaction::DIRECTION_RECIPIENT);
-            $pkiobjs['max_igposts'] = new pki_info('max_posts', null, pki_info::PKI_AGREGATED);
-            $pkiobjs['max_igreplies'] = new pki_info('max_replies', null, pki_info::PKI_AGREGATED);
-            $pkiobjs['max_iglikes'] = new pki_info('max_likes', null, pki_info::PKI_AGREGATED);
-        }
+        $pkiobjs['igposts'] = new pki_info('igposts', null, pki_info::PKI_INDIVIDUAL, social_interaction::POST, 'POST',
+                social_interaction::DIRECTION_AUTHOR);
+        $pkiobjs['igmentions'] = new pki_info('igmentions', null, pki_info::PKI_INDIVIDUAL, social_interaction::MENTION, '*',
+                social_interaction::DIRECTION_RECIPIENT);
+        $pkiobjs['igreplies'] = new pki_info('igreplies', null, pki_info::PKI_CUSTOM, social_interaction::REPLY, '*',
+                social_interaction::DIRECTION_RECIPIENT);
+        $pkiobjs['iglikes'] = new pki_info('iglikes', null, pki_info::PKI_CUSTOM, social_interaction::REACTION, 'nativetype = "LIKE"',
+                social_interaction::DIRECTION_RECIPIENT);
+        $pkiobjs['max_igposts'] = new pki_info('max_igposts', null, pki_info::PKI_AGREGATED);
+        $pkiobjs['max_igmentions'] = new pki_info('max_igmentions', null, pki_info::PKI_AGREGATED);
+        $pkiobjs['max_igreplies'] = new pki_info('max_igreplies', null, pki_info::PKI_CUSTOM);
+        $pkiobjs['max_iglikes'] = new pki_info('max_iglikes', null, pki_info::PKI_CUSTOM);
         return $pkiobjs;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see \msocial\msocial_plugin::get_settings() */
-    public function get_settings(\MoodleQuickForm $mform) {
-        $formfieldname = $this->get_form_field_name(self::CONFIG_IGSEARCH);
-        $mform->addElement('text', $formfieldname, get_string("igsearch", "msocialconnector_instagram"), array('size' => '20'));
-        $mform->setType($formfieldname, PARAM_TEXT);
-        $mform->addHelpButton($formfieldname, 'igsearch', 'msocialconnector_instagram');
     }
 
     /**
@@ -407,7 +412,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $postinteraction->timestamp = $date;
         $postinteraction->type = social_interaction::POST;
         $postinteraction->nativetype = 'POST';
-        $message = $post->caption?$post->caption->text:''; // TODO: manage better no captions (images, photos, etc.)
+        $message = $post->caption ? $post->caption->text : ''; // TODO: manage better no captions
+                                                               // (images, photos, etc.)
         $postinteraction->description = $message == '' ? 'No text.' : $message;
         $this->register_interaction($postinteraction);
         // Register each reaction as an interaction...
@@ -416,7 +422,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
 
     /**
-     * @param mixed $reactions
+     * @param mixed $reaction
      * @param social_interaction $parentinteraction */
     protected function process_reactions($reaction, $parentinteraction) {
         $nativetype = 'like';
@@ -435,6 +441,27 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $reactioninteraction->type = social_interaction::REACTION;
         $reactioninteraction->nativetype = $nativetype;
         $this->register_interaction($reactioninteraction);
+    }
+
+    /**
+     * @param mixed $mention
+     * @param social_interaction $parentinteraction */
+    protected function process_mention($mention, $parentinteraction) {
+        $nativetype = 'userinphoto';
+        $mentioninteraction = new social_interaction();
+        $mentioninteraction->fromid = $this->get_userid($mentioninguserid);
+        $mentioninteraction->nativefrom = $mention->id;
+        $mentioninteraction->nativefromname = $mention->username;
+        $mentioninteraction->uid = $parentinteraction->uid . '-' . $mentioninteraction->nativefrom;
+        $mentioninteraction->parentinteraction = $parentinteraction->uid;
+        $mentioninteraction->nativeto = $parentinteraction->nativefrom;
+        $mentioninteraction->toid = $parentinteraction->fromid;
+        $mentioninteraction->nativetoname = $parentinteraction->nativefromname;
+        $mentioninteraction->rawdata = json_encode($mention);
+        $mentioninteraction->timestamp = null;
+        $mentioninteraction->type = social_interaction::MENTION;
+        $mentioninteraction->nativetype = $nativetype;
+        $this->register_interaction($mentioninteraction);
     }
 
     /** Registra la interacción con la
@@ -528,7 +555,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $callbackurl = new \moodle_url("/mod/msocial/connector/instagram/instagramSSO.php",
                 array('id' => $this->cm->id, 'action' => 'callback', 'type' => 'profile'));
         $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
-
+        $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
         $ig = new \MetzWeb\Instagram\Instagram($config);
         // Get mapped users.
         $igusers = $DB->get_records('msocial_instagram_tokens', ['msocial' => $this->msocial->id]);
@@ -545,9 +572,13 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 }
                 // Mark the token as OK...
                 $DB->set_field('msocial_instagram_tokens', 'errorstatus', null, array('id' => $token->id));
-
+                // Iterate user's media.
                 while (isset($media->data) && count($media->data) > 0) {
                     foreach ($media->data as $post) {
+                        // Check tag condition.
+                        if ($igsearch && !array_search($igsearch, $post->tags)) {
+                            continue;
+                        }
                         $postinteraction = $this->process_post($post);
                         // $post->users_in_photo -> mentions.
                         // $post->comments -> count of comments.
@@ -584,18 +615,15 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                 }
                             }
                         }
+                        if ($post->users_in_photo && count($post->users_in_photo) > 0) {
+                            // Process reactions...
+                            foreach ($post->users_in_photo as $userinphoto) {
+                                $mentioninteraction = $this->process_mention($userinphoto->user, $postinteraction);
+                            }
+                        }
                     }
                     // Get next page of posts.
                     $media = $ig->pagination($media);
-                }
-                if ($token) {
-                    $token->errorstatus = $errormessage;
-                    $this->set_connection_token($token);
-                    if ($errormessage) { // Marks this tokens as erroneous to warn the teacher.
-                        $message = "Updating token with id = $token->id with $errormessage";
-                        $result->errors[] = (object) ['message' => $message];
-                        $result->messages[] = $message;
-                    }
                 }
             } catch (\Exception $e) {
                 $cm = $this->cm;
@@ -605,6 +633,15 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                          "searching term: $igsearch  ERROR:" . $e->getMessage();
                 $result->messages[] = $errormessage;
                 $result->errors[] = (object) ['message' => $errormessage];
+            }
+            if ($token) {
+                $token->errorstatus = $errormessage;
+                $this->set_connection_token($token);
+                if ($errormessage) { // Marks this tokens as erroneous to warn the teacher.
+                    $message = "Updating token with id = $token->id with $errormessage";
+                    $result->errors[] = (object) ['message' => $message];
+                    $result->messages[] = $message;
+                }
             }
         }
         // TODO: define if processsing is needed or not.

@@ -55,7 +55,7 @@ if ($action == 'connect') {
             array('id' => $id, 'action' => 'callback', 'type' => $type));
     $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
     $ig = new Instagram($config);
-    $loginurl = $ig->getLoginUrl(['public_content']);
+    $loginurl = $ig->getLoginUrl(['basic']);
 
     header("Location: $loginurl");
     die();

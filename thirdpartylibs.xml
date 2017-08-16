@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<libraries>
+ <library>
+    <location>instagram-sdk</location>
+    <name>Instagram-PHP-API</name>
+    <license>BSD</license>
+    <version>2.2</version>
+    <licenseversion>1.0+</licenseversion>
+<!--     https://github.com/cosenary/Instagram-PHP-API -->
+  </library>
+</libraries>
