@@ -13,7 +13,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
-/* ***************************
+/*
+ * **************************
  * Module developed at the University of Valladolid
  * Designed and directed by Juan Pablo de Castro at telecommunication engineering school
  * Copyright 2017 onwards EdUVaLab http://www.eduvalab.uva.es
@@ -24,31 +25,30 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-class restore_msocialconnector_facebook_subplugin extends restore_subplugin {
+class restore_msocialconnector_instagram_subplugin extends restore_subplugin {
 
-    /**
-     * Returns array the paths to be handled by the subplugin at msocial level
+    /** Returns array the paths to be handled by the subplugin at msocial level
      *
-     * @return array
-     */
+     * @return array */
     public function define_msocial_subplugin_structure() {
         $paths = array();
         $userinfo = $this->get_setting_value('userinfo');
-        $elename = $this->get_namefor('fbtoken');
-        $elepath = $this->get_pathfor('/fbtoken');
-        $paths[] = new restore_path_element($elename, $elepath);
+        if ($userinfo) {
+            $elename = $this->get_namefor('igtoken');
+            $elepath = $this->get_pathfor('/igtoken');
+            $paths[] = new restore_path_element($elename, $elepath);
+        }
         return $paths;
     }
 
-    public function process_msocialconnector_facebook_fbtoken($data) {
+    public function process_msocialconnector_instagram_fbtoken($data) {
         global $DB;
 
         $data = (object) $data;
 
         $data->msocial = $this->get_new_parentid('msocial');
+        $data->user = $this->get_mappingid('user', $data->user);
 
-        $newitemid = $DB->insert_record('msocial_facebook_tokens', $data);
+        $newitemid = $DB->insert_record('msocial_instagram_tokens', $data);
     }
-
-
 }

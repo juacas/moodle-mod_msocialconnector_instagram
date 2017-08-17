@@ -44,6 +44,6 @@ $string['module_not_connected_instagram'] = 'Module disconnected from instagram.
 // SETTINGS.
 $string['instagram_app_id'] = 'client_id';
 $string['config_app_id'] = 'client_id according to instagramAPI (<a href="https://www.instagram.com/developer/clients/manage/" target="_blank" >https://www.instagram.com/developer/clients/manage/</a>)';
-$string['instagram_app_secret'] = 'app_secret';
-$string['config_app_secret'] = 'app_secret according to instagramAPI (<a href="https://www.instagram.com/developer/clients/manage/" target="_blank" >https://www.instagram.com/developer/clients/manage/</a>)';
+$string['instagram_app_secret'] = 'client_secret';
+$string['config_app_secret'] = 'client_secret according to instagramAPI (<a href="https://www.instagram.com/developer/clients/manage/" target="_blank" >https://www.instagram.com/developer/clients/manage/</a>)';
 $string['problemwithinstagramaccount'] = 'Recent attempts to get the posts resulted in an error. Try to reconnect instagram with your user. Message: {$a}';

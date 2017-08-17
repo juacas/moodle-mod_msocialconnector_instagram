@@ -270,24 +270,20 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         return $usermessage;
     }
 
-
-
     public function get_social_user_url(social_user $userid) {
         return "https://www.instagram.com/$userid->socialname";
     }
 
     public function get_interaction_url(social_interaction $interaction) {
-        // instagram uid for a comment is generated with group id and comment id.
-        $parts = explode('_', $interaction->uid);
-        if (count($parts) == 2) {
-            $url = 'https://www.instagram.com/p/' . $parts[0] . '/permalink/' . $parts[1]; // TODO:
-                                                                                               // there
-                                                                                               // are
-                                                                                               // subinteractions???
+        // instagram url is embedded in json.
+        if ($interaction->nativetype == 'POST') {
+            $json = json_decode($interaction->rawdata);
+            $url = $json->link;
+        } else if ($interaction->nativetype == 'like') {
+            $url = $this->get_social_user_url(new social_user($interaction->nativefrom, $interaction->nativefromname));
         } else {
-            $url = 'https://www.instagram.com/p/' . $parts[0];
+            $url = '';
         }
-
         return $url;
     }
 
@@ -551,7 +547,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 while (isset($media->data) && count($media->data) > 0) {
                     foreach ($media->data as $post) {
                         // Check tag condition.
-                        if ($igsearch && !array_search($igsearch, $post->tags)) {
+                        if ($igsearch && $igsearch !== '*' && !array_search($igsearch, $post->tags)) {
                             continue;
                         }
                         $postinteraction = $this->process_post($post);
