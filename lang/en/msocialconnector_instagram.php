@@ -29,7 +29,7 @@
  */
 $string['pluginname'] = 'Instagram Connector';
 $string['igsearch'] = 'String to search for in Instagram Tags';
-$string['igsearch_empty'] = 'Search term absent. Configure it in this activity settings.';
+$string['igsearch_empty'] = 'Search term absent. Configure it in this activity <a href="../../course/modedit.php?update={$a->cmid}&return=1">settings</a>.';
 $string['igsearch_help'] = 'If specified, only media published with the specific tag is collected for analysis.';
 $string['igsearchingby'] = 'Searching for tag: "{$a}"';
 $string['harvest'] = 'Search instagram groups for student activity';

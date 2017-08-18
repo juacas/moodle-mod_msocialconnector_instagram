@@ -213,7 +213,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 // Check instagram hashtags...
                 $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
                 if (trim($igsearch) === "") {
-                    $notifications[] = get_string('igsearch_empty', 'msocialconnector_instagram');
+                    $notifications[] = get_string('igsearch_empty', 'msocialconnector_instagram', ['cmid' => $cm->id]);
                 } else {
                     $messages[] = get_string('igsearchingby', 'msocialconnector_instagram', $igsearch);
                 }
