@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <libraries>
  <library>
-    <location>instagram-sdk</location>
+    <location>vendor/instagram-sdk</location>
     <name>Instagram-PHP-API</name>
     <license>BSD</license>
     <version>2.2</version>

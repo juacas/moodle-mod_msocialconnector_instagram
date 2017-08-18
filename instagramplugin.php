@@ -512,8 +512,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
 
     public function harvest_users() {
         global $DB;
-        require_once ('instagram-sdk/InstagramException.php');
-        require_once ('instagram-sdk/Instagram.php');
+        require_once ('vendor/instagram-sdk/InstagramException.php');
+        require_once ('vendor/instagram-sdk/Instagram.php');
         $errormessage = null;
         $result = new \stdClass();
         $result->messages = [];
@@ -640,8 +640,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
 
     private function harvest_tags() {
         global $DB;
-        require_once ('instagram-sdk/InstagramException.php');
-        require_once ('instagram-sdk/Instagram.php');
+        require_once ('vendor/instagram-sdk/InstagramException.php');
+        require_once ('vendor/instagram-sdk/Instagram.php');
         $errormessage = null;
         $result = new \stdClass();
         $result->messages = [];
