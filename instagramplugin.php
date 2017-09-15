@@ -275,7 +275,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
 
     public function get_interaction_url(social_interaction $interaction) {
-        // instagram url is embedded in json.
+        // Instagram url is embedded in json.
         if ($interaction->nativetype == 'POST') {
             $json = json_decode($interaction->rawdata);
             $url = $json->link;
@@ -351,7 +351,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         if (!isset($token->ismaster)) {
             $token->ismaster = 1;
         }
-        $record = $DB->get_record('msocial_instagram_tokens', array("msocial" => $this->msocial->id));
+        $record = $DB->get_record('msocial_instagram_tokens', array("msocial" => $this->msocial->id, 'user' => $token->user ));
         if ($record) {
             $token->id = $record->id;
             $DB->update_record('msocial_instagram_tokens', $token);
@@ -419,6 +419,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * @param social_interaction $parentinteraction */
     protected function process_mention($mention, $parentinteraction) {
         $nativetype = 'userinphoto';
+        $mentioninguserid = $mention->id;
         $mentioninteraction = new social_interaction();
         $mentioninteraction->fromid = $this->get_userid($mentioninguserid);
         $mentioninteraction->nativefrom = $mention->id;
@@ -493,7 +494,13 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         }
         return [$name, $id];
     }
-
+    /**
+     * {@inheritDoc}
+     * @see \mod_msocial\connector\msocial_connector_plugin::preferred_harvest_intervals()
+     */
+    public function preferred_harvest_intervals() {
+        return new harvest_intervals (24 * 3600, 5000, 0, 0);
+    }
     /** Instagram content are grouped by tag.
      * Searching by tag may need special permissions from Instagram
      * API sandbox mode allows to gather personal medias by user. Will need to store individual
@@ -512,8 +519,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
 
     public function harvest_users() {
         global $DB;
-        require_once ('vendor/instagram-sdk/InstagramException.php');
-        require_once ('vendor/instagram-sdk/Instagram.php');
+        require_once('vendor/instagram-sdk/InstagramException.php');
+        require_once('vendor/instagram-sdk/Instagram.php');
         $errormessage = null;
         $result = new \stdClass();
         $result->messages = [];
@@ -527,17 +534,28 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 array('id' => $this->cm->id, 'action' => 'callback', 'type' => 'profile'));
         $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
         $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
+        if ($igsearch && $igsearch != '*') {
+            $igsearch = explode(',', $igsearch);
+            $igtags = [];
+            // Clean tag marks.
+            foreach ($igsearch as $tag) {
+                $igtags[] = trim(str_replace('#', '', $tag));
+            }
+            $igsearch = $igtags;
+        }
         $ig = new \MetzWeb\Instagram\Instagram($config);
+        $lastharvest = $this->get_config(self::LAST_HARVEST_TIME);
+        echo '<pre>';
         // Get mapped users.
         $igusers = $DB->get_records('msocial_instagram_tokens', ['msocial' => $this->msocial->id]);
         foreach ($igusers as $token) {
             try {
                 $ig->setAccessToken($token->token);
                 // Query instagram...
-                $lastharvest = $this->get_config(self::LAST_HARVEST_TIME);
                 $this->igcomments[$token->user] = 0;
                 $this->iglikes[$token->user] = 0;
                 $media = $ig->getUserMedia();
+
                 if ($media->meta->code != 200) { // Error.
                     throw new \Exception($media->meta->error_message);
                 }
@@ -545,21 +563,25 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 $DB->set_field('msocial_instagram_tokens', 'errorstatus', null, array('id' => $token->id));
                 // Iterate user's media.
                 while (isset($media->data) && count($media->data) > 0) {
+                    mtrace("Analysing " . count($media->data) . " posts from user $token->username.\n");
                     foreach ($media->data as $post) {
                         // Check tag condition.
-                        if ($igsearch && $igsearch !== '*' && !array_search($igsearch, $post->tags)) {
+                        if ($igsearch &&
+                                $igsearch !== '*' &&
+                                count(array_intersect($igsearch, $post->tags)) == 0 ) {
                             continue;
                         }
                         $postinteraction = $this->process_post($post);
-                        // $post->users_in_photo -> mentions.
-                        // $post->comments -> count of comments.
-                        // $post->likes -> count of comments.
+                        // Use $post->users_in_photo -> mentions.
+                        // Can use $post->comments -> count of comments.
+                        // Can use $post->likes -> count of comments.
                         $this->igcomments[$token->user] += $post->comments->count;
                         if ($post->comments->count > 0) {
                             $comments = $ig->getMediaComments($post->id);
                             if ($comments->meta->code == 200) {
                                 // Process comments...
                                 if ($comments) {
+                                    mtrace("Analysing " . count($comments->data) . " comments for user $token->username.\n");
                                     foreach ($comments->data as $comment) {
                                         $commentinteraction = $this->process_comment($comment, $postinteraction);
                                         /* @var $subcomment instagram\GraphNodes\GraphEdge */
@@ -571,13 +593,15 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                         }
                                     }
                                 }
+                            } else {
+                                mtrace("Can't retrieve list of comments for user $token->username for post $post->id, \n");
                             }
                         }
                         $this->iglikes[$token->user] += $post->likes->count;
                         if ($post->likes->count > 0) {
                             $likes = $ig->getMediaLikes($post->id);
                             if ($likes->meta->code == 200) {
-
+                                mtrace("Analysing " . count($likes->data) . " like reactions for user $token->username.\n");
                                 // Process reactions...
                                 if ($likes) {
                                     foreach ($likes->data as $like) {
@@ -615,6 +639,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 }
             }
         }
+        echo '</pre>';
         // TODO: define if processsing is needed or not.
         $processedinteractions = $this->lastinteractions; // $this->process_interactions($this->lastinteractions);
         $studentinteractions = array_filter($processedinteractions,
@@ -640,8 +665,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
 
     private function harvest_tags() {
         global $DB;
-        require_once ('vendor/instagram-sdk/InstagramException.php');
-        require_once ('vendor/instagram-sdk/Instagram.php');
+        require_once('vendor/instagram-sdk/InstagramException.php');
+        require_once('vendor/instagram-sdk/Instagram.php');
         $errormessage = null;
         $result = new \stdClass();
         $result->messages = [];

@@ -40,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_msocialconnector_instagram_install() {
     global $CFG, $DB;
-    require_once ($CFG->dirroot . '/mod/msocial/connector/instagram/instagramplugin.php');
+    require_once($CFG->dirroot . '/mod/msocial/connector/instagram/instagramplugin.php');
     $plugin = new mod_msocial\connector\msocial_connector_instagram(null);
     $plugin->create_pki_fields();
     return true;
