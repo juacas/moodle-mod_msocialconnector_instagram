@@ -28,14 +28,15 @@
  * and open the template in the editor.
  */
 $string['pluginname'] = 'Instagram Connector';
-$string['igsearch'] = 'String to search for in Instagram Tags';
+$string['igsearch'] = 'Tag list (separated by "," ) to search for in Instagram Posts. An "*" means that all posts are accepted';
 $string['igsearch_empty'] = 'Search term absent. Configure it in this activity <a href="../../course/modedit.php?update={$a->cmid}&return=1">settings</a>.';
-$string['igsearch_help'] = 'If specified, only media published with the specific tag is collected for analysis.';
-$string['igsearchingby'] = 'Searching for tag: "{$a}"';
+$string['igsearch_help'] = 'If specified, only media published with the specific tag is collected for analysis. If you wish to analyze all the posts enter "*" in this field.' .
+                            'Please bear in mind that retrieving too much, unrelated, posts may obscure the analysis.';
+$string['igsearchingby'] = 'Filtering by tags: "{$a}"';
 $string['harvest'] = 'Search instagram groups for student activity';
 
 $string['no_instagram_name_advice'] = 'Unlinked from instagram.';
-$string['no_instagram_name_advice2'] = '{$a->userfullname} is not linked to instagram. Register using instagram clicking in <a href="{$a->url}"><img src="{$a->pixurl}/loginwithinstagram.png" alt="instagram login"/></a>';
+$string['no_instagram_name_advice2'] = '{$a->userfullname} is not linked to instagram. Register using instagram clicking in <a href="{$a->url}"><!--<img src="{$a->pixurl}/loginwithinstagram.png" alt="instagram login"/>-->instagram login.</a>';
 
 $string['module_connected_instagram'] = 'Module connected with instagram as user "{$a}" ';
 $string['module_connected_instagram_usermode'] = 'Module searching instagram individually by users.';

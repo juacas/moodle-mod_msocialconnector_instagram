@@ -210,13 +210,13 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 } else { // MODE_USER
                     $messages[] = get_string('module_connected_instagram_usermode', 'msocialconnector_instagram') . $harvestbutton;
                 }
-                // Check instagram hashtags...
-                $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
-                if (trim($igsearch) === "") {
-                    $notifications[] = get_string('igsearch_empty', 'msocialconnector_instagram', ['cmid' => $cm->id]);
-                } else {
-                    $messages[] = get_string('igsearchingby', 'msocialconnector_instagram', $igsearch);
-                }
+            }
+            // Check instagram hashtags...
+            $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
+            if (trim($igsearch) === "") {
+                $notifications[] = get_string('igsearch_empty', 'msocialconnector_instagram', ['cmid' => $cm->id]);
+            } else {
+                $messages[] = get_string('igsearchingby', 'msocialconnector_instagram', $igsearch);
             }
             // Check user's social credentials.
             $socialuserids = $this->get_social_userid($USER);
