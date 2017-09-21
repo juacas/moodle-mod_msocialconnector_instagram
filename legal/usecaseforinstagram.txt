@@ -1,0 +1,28 @@
+General description of the plattform
+===================================
+Use case 1: Plattform for building learning analytics for teachers and students in any Moodle learning management system.
+MSocial is a plattform for building learning analytics of the activities of the students in social networks. For Instagram, MSocial collects posts of each registered student and the related likes and comments. A Graph analysis is done with the information about comments and likes for each post. For this analysis information about authoring of the comments and likes are needed to build nodes and edges in a network model. This information is only computed for the registered students in each course.
+
+Use case 2: Registering in MSocial
+When an user (student or teacher) enters the plattform a "login with Instagram" will be offered.
+After giving "public permissions" to the plattform, the teacher can launch analytics of the students' behaviour on Instagram.
+
+Use case 3: Collect and analysis.
+Upon teacher's request the plattform connect to Instagram to collect information about the students' posts. Only posts that meet the teacher's criteria (tags) are recorded for analysis. Related interactions of other users are collected also to meet "Use case 1".
+The platform computes basic statistics about the influence of the student on his community.
+
+
+In respond to:
+
+"General issues:
+Invalid Use Case: The use case described in your submission notes, screencast and website is not a valid use case. If you are trying to build analytics for personal use or one-off projects, note that we do not support one-off and single use projects. We recommend that you use a third-party platform that powers this use case. If you are building a platform for this use case, we will only approve one client ID for all your integrations. For more information, please see: https://www.instagram.com/developer/review/"
+
+"Use case Instagram: To help brands and advertisers understand and manage their audience and digital media rights: basic, public_content, comments, relationships, likes, follower_list
+
+This use case is meant for products that don't have a public facing login integration, but are gated to brands and advertisers. The product must support either multiple brands and advertisers (e.g. a social media management platform) or multiple users within a single brand or advertiser organization."
+
+This integration is focused on the University of Valladolid (the brand) and deals with the educational relationship with 30000 students (potentially).
+In the future, this software can be used for free in many educational institutions like Universities with thousands of students.
+This integration fully matches the use case: "multiple users within a single brand or advertiser organization".
+By using this software, it is likely that many institutions would start to use or increase the use of Instagram for generating educational content and interactions.
+Only one Client ID is needed for all our integrations, as noted on your permission review instructions.
