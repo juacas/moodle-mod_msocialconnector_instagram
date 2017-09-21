@@ -42,7 +42,7 @@ $context = context_module::instance($id);
 $msocial = $DB->get_record('msocial', array('id' => $cm->instance), '*', MUST_EXIST);
 $plugin = new msocial_connector_instagram($msocial);
 
-$thispageurl = new moodle_url('/mod/msocial/connector/instagram/instagramSSO.php',
+$thispageurl = new moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
         array('id' => $id, 'action' => $action, 'type' => $type));
 
 $appid = get_config("msocialconnector_instagram", "appid");
@@ -51,7 +51,7 @@ $message = '';
 
 if ($action == 'connect') {
     // GetToken.
-    $callbackurl = new moodle_url("/mod/msocial/connector/instagram/instagramSSO.php",
+    $callbackurl = new moodle_url("/mod/msocial/connector/instagram/connectorSSO.php",
             array('id' => $id, 'action' => 'callback', 'type' => $type));
     $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
     $ig = new Instagram($config);
@@ -110,7 +110,7 @@ if ($action == 'connect') {
     if ($type == 'profile') {
         $userid = required_param('userid', PARAM_INT);
         $socialid = required_param('socialid', PARAM_RAW_TRIMMED);
-        if ($userid !== $USER->id) {
+        if ($userid != $USER->id) {
             require_capability('mod/msocial:manage', $context);
         }
         $user = (object) ['id' => $userid];
