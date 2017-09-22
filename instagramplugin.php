@@ -69,13 +69,40 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 return false;
         }
     }
-
+    /**
+     *
+     * @param unknown $users
+     */
+    protected function calculate_custom_pkis($users) {
+        $interactions = $this->get_interactions($this->msocial->startdate, $this->msocial->enddate, $users);
+        $this->igcomments = [];
+        $this->iglikes = [];
+        foreach ($interactions as $interaction) {
+            $interactionjson = json_decode($interaction->rawdata);
+            $comments = $interactionjson->comments->count;
+            $likes = $interactionjson->likes->count;
+            if (!isset($this->igcomments[$interaction->fromid])) {
+                $this->igcomments[$interaction->fromid] = 0;
+            } else {
+                $this->igcomments[$interaction->fromid] += $comments;
+            }
+            if (!isset($this->iglikes[$interaction->fromid])) {
+                $this->iglikes[$interaction->fromid] = 0;
+            } else {
+                $this->iglikes[$interaction->fromid] += $likes;
+            }
+        }
+    }
     /**
      * {@inheritdoc}
      *
      * @see \msocial\msocial_plugin::calculate_pkis() */
     public function calculate_pkis($users, $pkis = []) {
         $pkis = parent::calculate_pkis($users, $pkis);
+        // Calculate stats igreplies and igcomments from interactions if needed.
+        if (count($this->igcomments) == 0) {
+            $this->calculate_custom_pkis($users);
+        }
         foreach ($pkis as $pki) {
             if (isset($this->igcomments[$pki->user])) {
                 $pki->igreplies = $this->igcomments[$pki->user];
@@ -104,16 +131,20 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     public function delete_instance() {
         global $DB;
         $result = true;
-        if (!$DB->delete_records('msocial_interactions', array('msocial' => $this->msocial->id, 'source' => $this->get_subtype()))) {
+        if (!$DB->delete_records('msocial_interactions',
+                array('msocial' => $this->msocial->id, 'source' => $this->get_subtype()))) {
             $result = false;
         }
-        if (!$DB->delete_records('msocial_instagram_tokens', array('msocial' => $this->msocial->id))) {
+        if (!$DB->delete_records('msocial_instagram_tokens',
+                array('msocial' => $this->msocial->id))) {
             $result = false;
         }
-        if (!$DB->delete_records('msocial_mapusers', array('msocial' => $this->msocial->id, 'type' => $this->get_subtype()))) {
+        if (!$DB->delete_records('msocial_mapusers',
+                array('msocial' => $this->msocial->id, 'type' => $this->get_subtype()))) {
             $result = false;
         }
-        if (!$DB->delete_records('msocial_plugin_config', array('msocial' => $this->msocial->id, 'subtype' => $this->get_subtype()))) {
+        if (!$DB->delete_records('msocial_plugin_config',
+                array('msocial' => $this->msocial->id, 'subtype' => $this->get_subtype()))) {
             $result = false;
         }
         return $result;
@@ -190,17 +221,17 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                      get_string('problemwithinstagramaccount', 'msocialconnector_instagram', $errorstatus);
                         }
 
-                        $messages[] = get_string('module_connected_instagram', 'msocialconnector_instagram', $username) . $OUTPUT->action_link(
-                                new \moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
-                                        array('id' => $id, 'action' => 'connect')), "Change user") . '/' . $OUTPUT->action_link(
-                                new \moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
+                        $messages[] = get_string('module_connected_instagram', 'msocialconnector_instagram', $username) .
+                                        $OUTPUT->action_link(new \moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
+                                        array('id' => $id, 'action' => 'connect')), "Change user") .
+                                  '/' . $OUTPUT->action_link(new \moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
                                         array('id' => $id, 'action' => 'disconnect')), "Disconnect") . ' ';
                     } else {
                         $notifications[] = get_string('module_not_connected_instagram', 'msocialconnector_instagram') .
                                             $OUTPUT->action_link($urlconnect, "Connect");
                     }
-                } else { // MODE_USER
-                    $messages[] = get_string('module_connected_instagram_usermode', 'msocialconnector_instagram') ;
+                } else { // MODE_USER.
+                    $messages[] = get_string('module_connected_instagram_usermode', 'msocialconnector_instagram');
                 }
             }
             // Check instagram hashtags...
@@ -255,18 +286,18 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      *
      * @see \msocial\msocial_plugin::get_pki_list() */
     public function get_pki_list() {
-        $pkiobjs['igposts'] = new pki_info('igposts', null, pki_info::PKI_INDIVIDUAL, social_interaction::POST, 'POST',
-                social_interaction::DIRECTION_AUTHOR);
-        $pkiobjs['igmentions'] = new pki_info('igmentions', null, pki_info::PKI_INDIVIDUAL, social_interaction::MENTION, '*',
-                social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['igreplies'] = new pki_info('igreplies', null, pki_info::PKI_CUSTOM, social_interaction::REPLY, '*',
-                social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['iglikes'] = new pki_info('iglikes', null, pki_info::PKI_CUSTOM, social_interaction::REACTION, 'nativetype = "LIKE"',
-                social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['max_igposts'] = new pki_info('max_igposts', null, pki_info::PKI_AGREGATED);
-        $pkiobjs['max_igmentions'] = new pki_info('max_igmentions', null, pki_info::PKI_AGREGATED);
-        $pkiobjs['max_igreplies'] = new pki_info('max_igreplies', null, pki_info::PKI_CUSTOM);
-        $pkiobjs['max_iglikes'] = new pki_info('max_iglikes', null, pki_info::PKI_CUSTOM);
+        $pkiobjs['igposts'] = new pki_info('igposts', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
+                social_interaction::POST, 'POST', social_interaction::DIRECTION_AUTHOR);
+        $pkiobjs['igmentions'] = new pki_info('igmentions', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
+                social_interaction::MENTION, '*', social_interaction::DIRECTION_RECIPIENT);
+        $pkiobjs['igreplies'] = new pki_info('igreplies', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
+                social_interaction::REPLY, '*', social_interaction::DIRECTION_RECIPIENT);
+        $pkiobjs['iglikes'] = new pki_info('iglikes', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
+                social_interaction::REACTION, 'nativetype = "LIKE"', social_interaction::DIRECTION_RECIPIENT);
+        $pkiobjs['max_igposts'] = new pki_info('max_igposts', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
+        $pkiobjs['max_igmentions'] = new pki_info('max_igmentions', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
+        $pkiobjs['max_igreplies'] = new pki_info('max_igreplies', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
+        $pkiobjs['max_iglikes'] = new pki_info('max_iglikes', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
         return $pkiobjs;
     }
 
@@ -351,7 +382,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $postinteraction->description = $message == '' ? 'No text.' : $message;
         $this->register_interaction($postinteraction);
         // Register each reaction as an interaction...
-        // $this->addScore($postname, (0.1 * sizeof($reactions)) + 1);
         return $postinteraction;
     }
 
@@ -603,27 +633,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             }
         }
         echo '</pre>';
-        // TODO: define if processsing is needed or not.
-        $processedinteractions = $this->lastinteractions; // $this->process_interactions($this->lastinteractions);
-        $studentinteractions = array_filter($processedinteractions,
-                function ($interaction) {
-                    return isset($interaction->fromid);
-                });
-        // TODO: define if all interactions are
-        // worth to be registered or only student's.
-        $this->store_interactions($processedinteractions);
-        $contextcourse = \context_course::instance($this->msocial->course);
-        list($students, $nonstudents, $active, $users) = msocial_get_users_by_type($contextcourse);
-        $pkis = $this->calculate_pkis($users);
-        $this->store_pkis($pkis, true);
-        $this->set_config(\mod_msocial\connector\msocial_connector_plugin::LAST_HARVEST_TIME, time());
 
-        $logmessage = "For module msocial\\connection\\instagram: \"" . $this->msocial->name . "\" (id=" . $this->msocial->id .
-                 ") in course (id=" . $this->msocial->course . ")  Found " . count($this->lastinteractions) .
-                 " events. Students' events: " . count($studentinteractions);
-        $result->messages[] = $logmessage;
-
-        return $result;
+        return $this->post_harvest($result);
     }
 
     private function harvest_tags() {
@@ -664,9 +675,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             while (count($media->data) > 0) {
                 foreach ($media->data as $post) {
                     $postinteraction = $this->process_post($post);
-                    // $post->users_in_photo -> mentions.
-                    // $post->comments -> count of comments.
-                    // $post->likes -> count of comments.
+                    // $post->users_in_photo ---> mentions.
+                    // $post->comments ---> count of comments.
+                    // $post->likes ---> count of comments.
                     if ($post->comments > 0) {
                         $comments = $ig->getMediaComments($post->id);
                         // Process comments...
@@ -701,32 +712,11 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             $cm = $this->cm;
             $msocial = $this->msocial;
 
-            $errormessage = "For module msocial\\connection\\instagram: $msocial->name (id=$cm->instance) in course (id=$msocial->course) " .
-                     "searching term: $igsearch  ERROR:" . $e->getMessage();
+            $errormessage = "For module msocial\\connection\\instagram: $msocial->name (id=$cm->instance) " .
+                            "in course (id=$msocial->course) searching term: $igsearch  ERROR:" . $e->getMessage();
             $result->messages[] = $errormessage;
             $result->errors[] = (object) ['message' => $errormessage];
         }
-        // TODO: define if processsing is needed or not.
-        $processedinteractions = $this->lastinteractions; // $this->process_interactions($this->lastinteractions);
-
-        $studentinteractions = array_filter($processedinteractions,
-                function ($interaction) {
-                    return isset($interaction->fromid);
-                });
-        // TODO: define if all interactions are
-        // worth to be registered or only student's.
-        $this->store_interactions($processedinteractions);
-        $contextcourse = \context_course::instance($this->msocial->course);
-        list($students, $nonstudents, $active, $users) = msocial_get_users_by_type($contextcourse);
-        $pkis = $this->calculate_pkis($users);
-        $this->store_pkis($pkis, true);
-        $this->set_config(\mod_msocial\connector\msocial_connector_plugin::LAST_HARVEST_TIME, time());
-
-        $logmessage = "For module msocial\\connection\\instagram: \"" . $this->msocial->name . "\" (id=" . $this->msocial->id .
-                 ") in course (id=" . $this->msocial->course . ")  Found " . count($this->lastinteractions) .
-                 " events. Students' events: " . count($studentinteractions);
-        $result->messages[] = $logmessage;
-
         if ($token) {
             $token->errorstatus = $errormessage;
             $this->set_connection_token($token);
@@ -736,6 +726,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 $result->messages[] = $message;
             }
         }
-        return $result;
+        return $this->post_harvest($result);
     }
 }
