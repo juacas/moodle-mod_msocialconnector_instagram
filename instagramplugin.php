@@ -538,7 +538,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         }
         $ig = new \MetzWeb\Instagram\Instagram($config);
         $lastharvest = $this->get_config(self::LAST_HARVEST_TIME);
-        echo '<pre>';
         // Get mapped users.
         $igusers = $DB->get_records('msocial_instagram_tokens', ['msocial' => $this->msocial->id]);
         foreach ($igusers as $token) {
@@ -556,7 +555,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 $DB->set_field('msocial_instagram_tokens', 'errorstatus', null, array('id' => $token->id));
                 // Iterate user's media.
                 while (isset($media->data) && count($media->data) > 0) {
-                    mtrace("Analysing " . count($media->data) . " posts from user $token->username.\n");
+                    mtrace("<li>Analysing " . count($media->data) . " posts from user $token->username. ");
                     foreach ($media->data as $post) {
                         // Check tag condition.
                         if ($igsearch &&
@@ -574,7 +573,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                             if ($comments->meta->code == 200) {
                                 // Process comments...
                                 if ($comments) {
-                                    mtrace("Analysing " . count($comments->data) . " comments for user $token->username.\n");
+                                    mtrace("<li>Analysing " . count($comments->data) . " comments for user $token->username. ");
                                     foreach ($comments->data as $comment) {
                                         $commentinteraction = $this->process_comment($comment, $postinteraction);
                                         /* @var $subcomment instagram\GraphNodes\GraphEdge */
@@ -587,14 +586,14 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                     }
                                 }
                             } else {
-                                mtrace("Can't retrieve list of comments for user $token->username for post $post->id, \n");
+                                mtrace("<li>Can't retrieve list of comments for user $token->username for post $post->id,  ");
                             }
                         }
                         $this->iglikes[$token->user] += $post->likes->count;
                         if ($post->likes->count > 0) {
                             $likes = $ig->getMediaLikes($post->id);
                             if ($likes->meta->code == 200) {
-                                mtrace("Analysing " . count($likes->data) . " like reactions for user $token->username.\n");
+                                mtrace("<li>Analysing " . count($likes->data) . " like reactions for user $token->username. ");
                                 // Process reactions...
                                 if ($likes) {
                                     foreach ($likes->data as $like) {
@@ -616,9 +615,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             } catch (\Exception $e) {
                 $cm = $this->cm;
                 $msocial = $this->msocial;
-
+                $igtags = implode(',', $igsearch);
                 $errormessage = "For module msocial\\connection\\instagram: $msocial->name (id=$cm->instance) in course (id=$msocial->course) " .
-                         "searching term: $igsearch  ERROR:" . $e->getMessage();
+                "searching term: $igtags ERROR:" . $e->getMessage();
                 $result->messages[] = $errormessage;
                 $result->errors[] = (object) ['message' => $errormessage];
             }
@@ -632,8 +631,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 }
             }
         }
-        echo '</pre>';
-
         return $this->post_harvest($result);
     }
 
