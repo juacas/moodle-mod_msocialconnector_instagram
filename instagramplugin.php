@@ -557,7 +557,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 while (isset($media->data) && count($media->data) > 0) {
                     mtrace("<li>Analysing " . count($media->data) . " posts from user $token->username. ");
                     foreach ($media->data as $post) {
-                        // Check tag condition.
+                        // Check tag condition. TODO: implement AND condition. Now it is OR.
                         if ($igsearch &&
                                 $igsearch !== '*' &&
                                 count(array_intersect($igsearch, $post->tags)) == 0 ) {

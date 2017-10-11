@@ -55,4 +55,5 @@ function xmldb_msocialconnector_instagram_upgrade($oldversion = 0) {
         // instagram savepoint reached.
         upgrade_plugin_savepoint(true, 2017081600, 'msocialconnector', 'instagram');
     }
+    return true;
 }
