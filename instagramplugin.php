@@ -238,8 +238,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
 
             // Check user's social credentials.
             $socialuserids = $this->get_social_userid($USER);
-            $usertoken = $this->get_user_tokens($USER->id);
-            if (!$socialuserids || ($this->mode == self::MODE_USER && $usertoken === false)) { // Offer to register.
+
+            if (!$socialuserids) { // Offer to register.
                 $notifications[] = $this->render_user_linking($USER, false, true);
             }
             // Check instagram hashtags...
@@ -266,8 +266,31 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         }
         return $harvestbutton;
     }
-
-
+    /**
+     *
+     * {@inheritDoc}
+     * @see \mod_msocial\connector\msocial_connector_plugin::get_social_userid()
+     */
+    public function get_social_userid($user) {
+        // Check user token if harvest mode is MODE_USER.
+        if ($this->mode == self::MODE_USER) {
+            if ($user instanceof \stdClass) {
+                $userid = $user->id;
+            } else {
+                $userid = (int) $user;
+            }
+            $usertoken = $this->get_user_tokens($userid);
+            if ($usertoken === false) {
+                return false;
+            }
+        }
+        return parent::get_social_userid($user);
+    }
+    /**
+     *
+     * {@inheritDoc}
+     * @see \mod_msocial\connector\msocial_connector_plugin::get_social_user_url()
+     */
     public function get_social_user_url(social_user $userid) {
         return "https://www.instagram.com/$userid->socialname";
     }
