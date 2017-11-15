@@ -104,11 +104,11 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             $this->calculate_custom_pkis($users);
         }
         foreach ($pkis as $pki) {
-            if (isset($this->igcomments[$pki->user])) {
-                $pki->igreplies = $this->igcomments[$pki->user];
+            if (isset($this->igcomments[$pki->userid])) {
+                $pki->igreplies = $this->igcomments[$pki->userid];
             }
-            if (isset($this->iglikes[$pki->user])) {
-                $pki->iglikes = $this->iglikes[$pki->user];
+            if (isset($this->iglikes[$pki->userid])) {
+                $pki->iglikes = $this->iglikes[$pki->userid];
             }
         }
         // Max.
@@ -230,9 +230,17 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                         $notifications[] = get_string('module_not_connected_instagram', 'msocialconnector_instagram') .
                                             $OUTPUT->action_link($urlconnect, "Connect");
                     }
+
                 } else { // MODE_USER.
                     $messages[] = get_string('module_connected_instagram_usermode', 'msocialconnector_instagram');
                 }
+            }
+
+            // Check user's social credentials.
+            $socialuserids = $this->get_social_userid($USER);
+            $usertoken = $this->get_user_tokens($USER->id);
+            if (!$socialuserids || ($this->mode == self::MODE_USER && $usertoken === false)) { // Offer to register.
+                $notifications[] = $this->render_user_linking($USER, false, true);
             }
             // Check instagram hashtags...
             $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
@@ -241,11 +249,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             } else {
                 $messages[] = get_string('igsearchingby', 'msocialconnector_instagram', $igsearch);
             }
-            // Check user's social credentials.
-            $socialuserids = $this->get_social_userid($USER);
-            if (!$socialuserids) { // Offer to register.
-                $notifications[] = $this->render_user_linking($USER, false, true);
-            }
+
         }
         return [$messages, $notifications];
     }
@@ -333,7 +337,19 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         }
         return $token;
     }
-
+    /**
+     * Get tokens of all users or just of the specified userid.
+     * @param int $userid if null returns all users' tokens
+     * @return array
+     */
+    public function get_user_tokens($userid = null) {
+        global $DB;
+        if ($userid == null) {
+            return $DB->get_records('msocial_instagram_tokens', ['msocial' => $this->msocial->id]);
+        } else {
+            return $DB->get_record('msocial_instagram_tokens', ['msocial' => $this->msocial->id, 'userid' => $userid]);
+        }
+    }
     /**
      * {@inheritdoc}
      *
@@ -345,7 +361,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         if (!isset($token->ismaster)) {
             $token->ismaster = 1;
         }
-        $record = $DB->get_record('msocial_instagram_tokens', array("msocial" => $this->msocial->id, 'user' => $token->user ));
+        $record = $DB->get_record('msocial_instagram_tokens', array("msocial" => $this->msocial->id, 'userid' => $token->userid ));
         if ($record) {
             $token->id = $record->id;
             $DB->update_record('msocial_instagram_tokens', $token);
@@ -539,8 +555,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $ig = new \MetzWeb\Instagram\Instagram($config);
         $lastharvest = $this->get_config(self::LAST_HARVEST_TIME);
         // Get mapped users.
-        $igusers = $DB->get_records('msocial_instagram_tokens', ['msocial' => $this->msocial->id]);
-        foreach ($igusers as $token) {
+        $igusertokens = $this->get_user_tokens();
+        foreach ($igusertokens as $token) {
             try {
                 $ig->setAccessToken($token->token);
                 // Query instagram...

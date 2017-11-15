@@ -82,7 +82,7 @@ if ($action == 'connect') {
 
                 $plugin->set_social_userid($USER, $data->user->id, $username);
                 $token = (object) ['token' => $data->access_token, 'msocial' => $plugin->msocial->id, 'ismaster' => 0,
-                                'user' => $USER->id, 'username' => $username];
+                                'userid' => $USER->id, 'username' => $username];
                 $plugin->set_connection_token($token);
                 $message .= "Profile updated with instagram user $username.";
             } else {
