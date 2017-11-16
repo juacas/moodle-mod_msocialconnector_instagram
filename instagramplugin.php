@@ -567,14 +567,17 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
         $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
         if ($igsearch && $igsearch != '*') {
-            $igsearch = explode(',', $igsearch);
             $igtags = [];
+            $igsearchtags = explode(',', $igsearch);
             // Clean tag marks.
-            foreach ($igsearch as $tag) {
+            foreach ($igsearchtags as $tag) {
                 $igtags[] = trim(str_replace('#', '', $tag));
             }
-            $igsearch = $igtags;
+            if (count($igtags) > 0) {
+                $igsearch = implode(' AND ', $igtags);
+            }
         }
+        $tagparser = new \tag_parser($igsearch);
         $ig = new \MetzWeb\Instagram\Instagram($config);
         $lastharvest = $this->get_config(self::LAST_HARVEST_TIME);
         // Get mapped users.
@@ -583,8 +586,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             try {
                 $ig->setAccessToken($token->token);
                 // Query instagram...
-                $this->igcomments[$token->user] = 0;
-                $this->iglikes[$token->user] = 0;
+                $this->igcomments[$token->userid] = 0;
+                $this->iglikes[$token->userid] = 0;
                 $media = $ig->getUserMedia();
 
                 if ($media->meta->code != 200) { // Error.
@@ -596,17 +599,21 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 while (isset($media->data) && count($media->data) > 0) {
                     mtrace("<li>Analysing " . count($media->data) . " posts from user $token->username. ");
                     foreach ($media->data as $post) {
-                        // Check tag condition. TODO: implement AND condition. Now it is OR.
-                        if ($igsearch &&
-                                $igsearch !== '*' &&
-                                count(array_intersect($igsearch, $post->tags)) == 0 ) {
+                        if (!$tagparser->check_hashtaglist(implode(',', $post->tags))) {
                             continue;
                         }
+                        // Check tag condition. TODO: implement AND condition. Now it is OR.
+//                         if ($igsearch &&
+//                                 $igsearch !== '*' &&
+//                                 count(array_intersect($igsearch, $post->tags)) == 0 ) {
+//                             continue;
+//                         }
+
                         $postinteraction = $this->process_post($post);
                         // Use $post->users_in_photo -> mentions.
                         // Can use $post->comments -> count of comments.
                         // Can use $post->likes -> count of comments.
-                        $this->igcomments[$token->user] += $post->comments->count;
+                        $this->igcomments[$token->userid] += $post->comments->count;
                         if ($post->comments->count > 0) {
                             $comments = $ig->getMediaComments($post->id);
                             if ($comments->meta->code == 200) {
@@ -628,13 +635,13 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                 mtrace("<li>Can't retrieve list of comments for user $token->username for post $post->id,  ");
                             }
                         }
-                        $this->iglikes[$token->user] += $post->likes->count;
+                        $this->iglikes[$token->userid] += $post->likes->count;
                         if ($post->likes->count > 0) {
                             $likes = $ig->getMediaLikes($post->id);
                             if ($likes->meta->code == 200) {
-                                mtrace("<li>Analysing " . count($likes->data) . " like reactions for user $token->username. ");
                                 // Process reactions...
                                 if ($likes) {
+                                    mtrace("<li>Analysing " . count($likes->data) . " like reactions for user $token->username. ");
                                     foreach ($likes->data as $like) {
                                         $likeinteraction = $this->process_reactions($like, $postinteraction);
                                     }
