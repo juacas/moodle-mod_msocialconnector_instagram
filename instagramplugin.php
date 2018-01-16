@@ -384,6 +384,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         if (!isset($token->ismaster)) {
             $token->ismaster = 1;
         }
+        if (empty($token->errorstatus)) {
+            $token->errorstatus = null;
+        }
         $record = $DB->get_record('msocial_instagram_tokens', array("msocial" => $this->msocial->id, 'userid' => $token->userid ));
         if ($record) {
             $token->id = $record->id;
