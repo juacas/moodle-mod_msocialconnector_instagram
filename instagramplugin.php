@@ -313,13 +313,17 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      *
      * @see \msocial\msocial_plugin::get_pki_list() */
     public function get_pki_list() {
-        $pkiobjs['igposts'] = new pki_info('igposts', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
+        $pkiobjs['igposts'] = new pki_info('igposts', get_string('pki_description_igposts', 'msocialconnector_instagram'),
+                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
                 social_interaction::POST, 'POST', social_interaction::DIRECTION_AUTHOR);
-        $pkiobjs['igmentions'] = new pki_info('igmentions', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
+        $pkiobjs['igmentions'] = new pki_info('igmentions', get_string('pki_description_igmentions', 'msocialconnector_instagram'),
+                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
                 social_interaction::MENTION, '*', social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['igreplies'] = new pki_info('igreplies', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
+        $pkiobjs['igreplies'] = new pki_info('igreplies', get_string('pki_description_igreplies', 'msocialconnector_instagram'),
+                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
                 social_interaction::REPLY, '*', social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['iglikes'] = new pki_info('iglikes', null, pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
+        $pkiobjs['iglikes'] = new pki_info('iglikes', get_string('pki_description_iglikes', 'msocialconnector_instagram'),
+                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
                 social_interaction::REACTION, 'nativetype = "LIKE"', social_interaction::DIRECTION_RECIPIENT);
         $pkiobjs['max_igposts'] = new pki_info('max_igposts', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
         $pkiobjs['max_igmentions'] = new pki_info('max_igmentions', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);

@@ -48,3 +48,8 @@ $string['config_app_id'] = 'client_id according to instagramAPI (<a href="https:
 $string['instagram_app_secret'] = 'client_secret';
 $string['config_app_secret'] = 'client_secret according to instagramAPI (<a href="https://www.instagram.com/developer/clients/manage/" target="_blank" >https://www.instagram.com/developer/clients/manage/</a>)';
 $string['problemwithinstagramaccount'] = 'Recent attempts to get the posts resulted in an error. Try to reconnect instagram with your user. Message: {$a}';
+
+$string['pki_description_igposts'] = 'Published posts';
+$string['pki_description_igreplies'] = 'Received comments';
+$string['pki_description_igmentions'] = 'Received mentions in other posts';
+$string['pki_description_iglikes'] = 'Received LIKEs';
