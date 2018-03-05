@@ -29,7 +29,7 @@ use mod_msocial\connector\msocial_connector_instagram;
 require_once('vendor/instagram-sdk/InstagramException.php');
 require_once('vendor/instagram-sdk/Instagram.php');
 require_once("../../../../config.php");
-require_once('../../msocialconnectorplugin.php');
+require_once('../../classes/msocialconnectorplugin.php');
 require_once('instagramplugin.php');
 global $CFG;
 $id = required_param('id', PARAM_INT); // MSocial module instance.

@@ -26,8 +26,6 @@
 namespace mod_msocial\connector;
 
 use instagram\instagram as instagram;
-use instagram\GraphNodes\GraphEdge;
-use instagram\GraphNodes\GraphNode;
 use mod_msocial\pki_info;
 use msocial\msocial_plugin;
 use mod_msocial\social_user;
@@ -71,9 +69,10 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
     /**
      *
-     * @param unknown $users
+     * @param array[int] $users array of userids
      */
     protected function calculate_custom_pkis($users) {
+
         $interactions = $this->get_interactions($this->msocial->startdate, $this->msocial->enddate, $users);
         $this->igcomments = [];
         $this->iglikes = [];
@@ -609,13 +608,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                         if (!$tagparser->check_hashtaglist(implode(',', $post->tags))) {
                             continue;
                         }
-                        // Check tag condition. TODO: implement AND condition. Now it is OR.
-//                         if ($igsearch &&
-//                                 $igsearch !== '*' &&
-//                                 count(array_intersect($igsearch, $post->tags)) == 0 ) {
-//                             continue;
-//                         }
-
                         $postinteraction = $this->process_post($post);
                         // Use $post->users_in_photo -> mentions.
                         // Can use $post->comments -> count of comments.
@@ -668,7 +660,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             } catch (\Exception $e) {
                 $cm = $this->cm;
                 $msocial = $this->msocial;
-                $igtags = implode(',', $igsearch);
+                $igtags = empty($igsearch) ? '' : implode(',', $igsearch);
                 $errormessage = "For module msocial\\connection\\instagram: $msocial->name (id=$cm->instance) in course (id=$msocial->course) " .
                 "searching term: $igtags ERROR:" . $e->getMessage();
                 $result->messages[] = $errormessage;
@@ -725,9 +717,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             while (count($media->data) > 0) {
                 foreach ($media->data as $post) {
                     $postinteraction = $this->process_post($post);
-                    // $post->users_in_photo ---> mentions.
-                    // $post->comments ---> count of comments.
-                    // $post->likes ---> count of comments.
+                    // The $post->users_in_photo ---> mentions.
+                    // The $post->comments ---> count of comments.
+                    // The $post->likes ---> count of comments.
                     if ($post->comments > 0) {
                         $comments = $ig->getMediaComments($post->id);
                         // Process comments...
