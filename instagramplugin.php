@@ -55,8 +55,11 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
 
     /**
-     * @return true if the plugin is making searches in the social network */
-    public function is_tracking() {
+     *
+     * {@inheritDoc}
+     * @see \msocial\msocial_plugin::can_harvest()
+     */
+    public function can_harvest() {
         $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
         switch ($this->mode) {
             case self::MODE_TAG:
@@ -254,15 +257,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
     public function render_harvest_link() {
         global $OUTPUT;
-        $harvestbutton = '';
-        $context = \context_module::instance($this->cm->id);
-        if (has_capability('mod/msocial:manage', $context) && has_capability('mod/msocial:manage', $context)) {
-            if ($this->is_tracking()) {
-                $harvestbutton = $OUTPUT->action_icon(
-                        new \moodle_url('/mod/msocial/harvest.php', ['id' => $this->cm->id, 'subtype' => $this->get_subtype()]),
-                        new \pix_icon('a/refresh', get_string('harvest', 'msocialconnector_instagram')));
-            }
-        }
+        $harvestbutton = $OUTPUT->action_icon(
+                new \moodle_url('/mod/msocial/harvest.php', ['id' => $this->cm->id, 'subtype' => $this->get_subtype()]),
+                new \pix_icon('a/refresh', get_string('harvest', 'msocialconnector_instagram')));
         return $harvestbutton;
     }
     /**
