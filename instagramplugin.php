@@ -26,7 +26,7 @@
 namespace mod_msocial\connector;
 
 use instagram\instagram as instagram;
-use mod_msocial\pki_info;
+use mod_msocial\kpi_info;
 use msocial\msocial_plugin;
 use mod_msocial\social_user;
 
@@ -74,7 +74,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      *
      * @param array[int] $users array of userids
      */
-    protected function calculate_custom_pkis($users) {
+    protected function calculate_custom_kpis($users) {
 
         $interactions = $this->get_interactions($this->msocial->startdate, $this->msocial->enddate, $users);
         $this->igcomments = [];
@@ -98,33 +98,33 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::calculate_pkis() */
-    public function calculate_pkis($users, $pkis = []) {
-        $pkis = parent::calculate_pkis($users, $pkis);
+     * @see \msocial\msocial_plugin::calculate_kpis() */
+    public function calculate_kpis($users, $kpis = []) {
+        $kpis = parent::calculate_kpis($users, $kpis);
         // Calculate stats igreplies and igcomments from interactions if needed.
         if (count($this->igcomments) == 0) {
-            $this->calculate_custom_pkis($users);
+            $this->calculate_custom_kpis($users);
         }
-        foreach ($pkis as $pki) {
-            if (isset($this->igcomments[$pki->userid])) {
-                $pki->igreplies = $this->igcomments[$pki->userid];
+        foreach ($kpis as $kpi) {
+            if (isset($this->igcomments[$kpi->userid])) {
+                $kpi->igreplies = $this->igcomments[$kpi->userid];
             }
-            if (isset($this->iglikes[$pki->userid])) {
-                $pki->iglikes = $this->iglikes[$pki->userid];
+            if (isset($this->iglikes[$kpi->userid])) {
+                $kpi->iglikes = $this->iglikes[$kpi->userid];
             }
         }
         // Max.
         $maxcomments = 0;
         $maxlikes = 0;
-        foreach ($pkis as $pki) {
-            $maxcomments = max([$maxcomments, $pki->igreplies]);
-            $maxlikes = max([$maxlikes, $pki->iglikes]);
+        foreach ($kpis as $kpi) {
+            $maxcomments = max([$maxcomments, $kpi->igreplies]);
+            $maxlikes = max([$maxlikes, $kpi->iglikes]);
         }
-        foreach ($pkis as $pki) {
-            $pki->max_igreplies = $maxcomments;
-            $pki->max_iglikes = $maxlikes;
+        foreach ($kpis as $kpi) {
+            $kpi->max_igreplies = $maxcomments;
+            $kpi->max_iglikes = $maxlikes;
         }
-        return $pkis;
+        return $kpis;
     }
 
     /** The msocial has been deleted - cleanup subplugin
@@ -307,25 +307,25 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::get_pki_list() */
-    public function get_pki_list() {
-        $pkiobjs['igposts'] = new pki_info('igposts', get_string('pki_description_igposts', 'msocialconnector_instagram'),
-                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
+     * @see \msocial\msocial_plugin::get_kpi_list() */
+    public function get_kpi_list() {
+        $kpiobjs['igposts'] = new kpi_info('igposts', get_string('kpi_description_igposts', 'msocialconnector_instagram'),
+                kpi_info::KPI_INDIVIDUAL, kpi_info::KPI_CALCULATED,
                 social_interaction::POST, 'POST', social_interaction::DIRECTION_AUTHOR);
-        $pkiobjs['igmentions'] = new pki_info('igmentions', get_string('pki_description_igmentions', 'msocialconnector_instagram'),
-                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CALCULATED,
+        $kpiobjs['igmentions'] = new kpi_info('igmentions', get_string('kpi_description_igmentions', 'msocialconnector_instagram'),
+                kpi_info::KPI_INDIVIDUAL, kpi_info::KPI_CALCULATED,
                 social_interaction::MENTION, '*', social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['igreplies'] = new pki_info('igreplies', get_string('pki_description_igreplies', 'msocialconnector_instagram'),
-                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
+        $kpiobjs['igreplies'] = new kpi_info('igreplies', get_string('kpi_description_igreplies', 'msocialconnector_instagram'),
+                kpi_info::KPI_INDIVIDUAL, kpi_info::KPI_CUSTOM,
                 social_interaction::REPLY, '*', social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['iglikes'] = new pki_info('iglikes', get_string('pki_description_iglikes', 'msocialconnector_instagram'),
-                pki_info::PKI_INDIVIDUAL, pki_info::PKI_CUSTOM,
+        $kpiobjs['iglikes'] = new kpi_info('iglikes', get_string('kpi_description_iglikes', 'msocialconnector_instagram'),
+                kpi_info::KPI_INDIVIDUAL, kpi_info::KPI_CUSTOM,
                 social_interaction::REACTION, 'nativetype = "LIKE"', social_interaction::DIRECTION_RECIPIENT);
-        $pkiobjs['max_igposts'] = new pki_info('max_igposts', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
-        $pkiobjs['max_igmentions'] = new pki_info('max_igmentions', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
-        $pkiobjs['max_igreplies'] = new pki_info('max_igreplies', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
-        $pkiobjs['max_iglikes'] = new pki_info('max_iglikes', null, pki_info::PKI_AGREGATED, pki_info::PKI_CUSTOM);
-        return $pkiobjs;
+        $kpiobjs['max_igposts'] = new kpi_info('max_igposts', null, kpi_info::KPI_AGREGATED, kpi_info::KPI_CUSTOM);
+        $kpiobjs['max_igmentions'] = new kpi_info('max_igmentions', null, kpi_info::KPI_AGREGATED, kpi_info::KPI_CUSTOM);
+        $kpiobjs['max_igreplies'] = new kpi_info('max_igreplies', null, kpi_info::KPI_AGREGATED, kpi_info::KPI_CUSTOM);
+        $kpiobjs['max_iglikes'] = new kpi_info('max_iglikes', null, kpi_info::KPI_AGREGATED, kpi_info::KPI_CUSTOM);
+        return $kpiobjs;
     }
 
     /**
@@ -592,7 +592,11 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 $this->igcomments[$token->userid] = 0;
                 $this->iglikes[$token->userid] = 0;
                 $media = $ig->getUserMedia();
-
+                // Exceeded requests per hour.
+                if (isset($media->code) && $media->code == 429) {
+                    mtrace("<li>ERROR: $media->error_type ==> User $token->username exceeded requests: $media->error_message.");
+                    continue;
+                }
                 if ($media->meta->code != 200) { // Error.
                     throw new \Exception($media->meta->error_message);
                 }
@@ -612,7 +616,10 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                         $this->igcomments[$token->userid] += $post->comments->count;
                         if ($post->comments->count > 0) {
                             $comments = $ig->getMediaComments($post->id);
-                            if ($comments->meta->code == 200) {
+                            // Exceeded requests per hour.
+                            if (isset($comments->code) && $comments->code == 429) {
+                                mtrace("ERROR on media comments: $comments->error_type ==> User $token->username exceeded requests: $comments->error_message.");
+                            } else if ($comments->meta->code == 200) {
                                 // Process comments...
                                 if ($comments) {
                                     mtrace("<li>Analysing " . count($comments->data) . " comments for user $token->username. ");
@@ -633,13 +640,15 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                         }
                         $this->iglikes[$token->userid] += $post->likes->count;
                         if ($post->likes->count > 0) {
-                            $likes = $ig->getMediaLikes($post->id);
-                            if ($likes->meta->code == 200) {
-                                // Process reactions...
-                                if ($likes) {
-                                    mtrace("<li>Analysing " . count($likes->data) . " like reactions for user $token->username. ");
-                                    foreach ($likes->data as $like) {
-                                        $likeinteraction = $this->process_reactions($like, $postinteraction);
+                            if (false) { // TODO: API retired.
+                                $likes = $ig->getMediaLikes($post->id);
+                                if ($likes->meta->code == 200) {
+                                    // Process reactions...
+                                    if ($likes) {
+                                        mtrace("<li>Analysing " . count($likes->data) . " like reactions for user $token->username. ");
+                                        foreach ($likes->data as $like) {
+                                            $likeinteraction = $this->process_reactions($like, $postinteraction);
+                                        }
                                     }
                                 }
                             }
@@ -657,10 +666,10 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             } catch (\Exception $e) {
                 $cm = $this->cm;
                 $msocial = $this->msocial;
-                $igtags = empty($igsearch) ? '' : implode(',', $igsearch);
+                $igtags = empty($igsearch) ? '' :  $igsearch;
                 $errormessage = "For module msocial\\connection\\instagram: $msocial->name (id=$cm->instance) in course (id=$msocial->course) " .
                 "searching term: $igtags ERROR:" . $e->getMessage();
-                $result->messages[] = $errormessage;
+
                 $result->errors[] = (object) ['message' => $errormessage];
             }
             if ($token) {
@@ -669,7 +678,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 if ($errormessage) { // Marks this tokens as erroneous to warn the teacher.
                     $message = "Updating token with id = $token->id with $errormessage";
                     $result->errors[] = (object) ['message' => $message];
-                    $result->messages[] = $message;
                 }
             }
         }

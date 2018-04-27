@@ -51,7 +51,7 @@ function xmldb_msocialconnector_instagram_upgrade($oldversion = 0) {
     if ($oldversion < 2017081600) {
         require_once($CFG->dirroot . '/mod/msocial/connector/instagram/instagramplugin.php');
         $plugininfo = new mod_msocial\connector\msocial_connector_instagram(null);
-        $plugininfo->create_pki_fields();
+        $plugininfo->create_kpi_fields();
         // instagram savepoint reached.
         upgrade_plugin_savepoint(true, 2017081600, 'msocialconnector', 'instagram');
     }
