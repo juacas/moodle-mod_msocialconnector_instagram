@@ -29,6 +29,7 @@ use instagram\instagram as instagram;
 use mod_msocial\kpi_info;
 use msocial\msocial_plugin;
 use mod_msocial\social_user;
+use mod_msocial\users_struct;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -72,9 +73,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
     /**
      *
-     * @param array[int] $users array of userids
+     * @param users_struct $users structure with arrays of userids
      */
-    protected function calculate_custom_kpis($users) {
+    protected function calculate_custom_kpis(users_struct $users) {
 
         $interactions = $this->get_interactions($this->msocial->startdate, $this->msocial->enddate, $users);
         $this->igcomments = [];
@@ -99,7 +100,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * {@inheritdoc}
      *
      * @see \msocial\msocial_plugin::calculate_kpis() */
-    public function calculate_kpis($users, $kpis = []) {
+    public function calculate_kpis(users_struct $users, $kpis = []) {
         $kpis = parent::calculate_kpis($users, $kpis);
         // Calculate stats igreplies and igcomments from interactions if needed.
         if (count($this->igcomments) == 0) {
@@ -350,7 +351,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * {@inheritdoc}
      *
      * @global moodle_database $DB
-     * @return type */
+     * @return \stdClass */
     public function get_connection_token() {
         global $DB;
         if ($this->msocial) {
@@ -666,7 +667,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             } catch (\Exception $e) {
                 $cm = $this->cm;
                 $msocial = $this->msocial;
-                $igtags = empty($igsearch) ? '' :  $igsearch;
+                $igtags = empty($igsearch) ? '' : $igsearch;
                 $errormessage = "For module msocial\\connection\\instagram: $msocial->name (id=$cm->instance) in course (id=$msocial->course) " .
                 "searching term: $igtags ERROR:" . $e->getMessage();
 
