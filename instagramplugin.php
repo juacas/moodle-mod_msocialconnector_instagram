@@ -592,7 +592,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 // Query instagram...
                 $this->igcomments[$token->userid] = 0;
                 $this->iglikes[$token->userid] = 0;
-                $media = $ig->getUserMedia();
+                $media = $ig->getUserMedia('self', 100);
                 // Exceeded requests per hour.
                 if (isset($media->code) && $media->code == 429) {
                     mtrace("<li>ERROR: $media->error_type ==> User $token->username exceeded requests: $media->error_message.");
@@ -661,8 +661,12 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                             }
                         }
                     }
-                    // Get next page of posts.
-                    $media = $ig->pagination($media);
+                    if (msocial_time_is_between($post->created_time, $this->msocial->startdate, $this->msocial->enddate)) {
+                        // Get next page of posts.
+                        $media = $ig->pagination($media);
+                    } else {
+                        break;
+                    }
                 }
             } catch (\Exception $e) {
                 $cm = $this->cm;
