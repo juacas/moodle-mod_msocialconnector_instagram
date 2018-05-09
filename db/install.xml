@@ -13,6 +13,7 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" comment="Local user token for accessing by user to the api"/>
         <FIELD NAME="username" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="errorstatus" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="lastused" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" comment="Last use timestamp"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

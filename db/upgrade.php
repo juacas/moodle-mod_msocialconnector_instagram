@@ -46,14 +46,23 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_msocialconnector_instagram_upgrade($oldversion = 0) {
-    global $CFG;
-
+    global $CFG, $DB;
+    require_once($CFG->dirroot . '/mod/msocial/connector/instagram/instagramplugin.php');
+    /* @var $dbman database_manager */
+    $dbman = $DB->get_manager();
     if ($oldversion < 2017081600) {
-        require_once($CFG->dirroot . '/mod/msocial/connector/instagram/instagramplugin.php');
         $plugininfo = new mod_msocial\connector\msocial_connector_instagram(null);
         $plugininfo->create_kpi_fields();
         // instagram savepoint reached.
         upgrade_plugin_savepoint(true, 2017081600, 'msocialconnector', 'instagram');
     }
+    if ($oldversion < 2018050900) {
+        $table = new xmldb_table('msocial_instagram_tokens');
+        $field = new xmldb_field('lastused', \XMLDB_TYPE_INTEGER, 10);
+        $dbman->add_field($table, $field);
+        // instagram savepoint reached.
+        upgrade_plugin_savepoint(true, 2018050900, 'msocialconnector', 'instagram');
+    }
+
     return true;
 }

@@ -607,6 +607,9 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 while (isset($media->data) && count($media->data) > 0) {
                     mtrace("<li>Analysing " . count($media->data) . " posts from user $token->username. ");
                     foreach ($media->data as $post) {
+                        if (!msocial_time_is_between($post->created_time, $this->msocial->startdate, $this->msocial->enddate)) {
+                            continue;
+                        }
                         if (!$tagparser->check_hashtaglist(implode(',', $post->tags))) {
                             continue;
                         }
@@ -679,6 +682,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             }
             if ($token) {
                 $token->errorstatus = $errormessage;
+                $token->lastused = time();
                 $this->set_connection_token($token);
                 if ($errormessage) { // Marks this tokens as erroneous to warn the teacher.
                     $message = "Updating token with id = $token->id with $errormessage";
