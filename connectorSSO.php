@@ -42,7 +42,7 @@ $context = context_module::instance($id);
 $msocial = $DB->get_record('msocial', array('id' => $cm->instance), '*', MUST_EXIST);
 $plugin = new msocial_connector_instagram($msocial);
 
-$thispageurl = new moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
+$interactionurl = new moodle_url('/mod/msocial/connector/instagram/connectorSSO.php',
         array('id' => $id, 'action' => $action, 'type' => $type));
 
 $appid = get_config("msocialconnector_instagram", "appid");
@@ -62,7 +62,7 @@ if ($action == 'connect') {
 } else if ($action == 'callback') {
     $code = required_param('code', PARAM_RAW);
     try {
-        $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $thispageurl->out(false));
+        $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $interactionurl->out(false));
 
         $ig = new Instagram($config);
         $data = $ig->getOAuthToken($code);
@@ -98,7 +98,7 @@ if ($action == 'connect') {
     }
 
     // Show headings and menus of page.
-    $PAGE->set_url($thispageurl);
+    $PAGE->set_url($interactionurl);
     $PAGE->set_title(format_string($cm->name));
 
     $PAGE->set_heading($course->fullname);
@@ -117,7 +117,7 @@ if ($action == 'connect') {
         // Remove the mapping.
         $plugin->unset_social_userid($user, $socialid);
         // Show headings and menus of page.
-        $PAGE->set_url($thispageurl);
+        $PAGE->set_url($interactionurl);
         $PAGE->set_title(format_string($cm->name));
         $PAGE->set_heading($course->fullname);
         // Print the page header.
@@ -128,7 +128,7 @@ if ($action == 'connect') {
         require_capability('mod/msocial:manage', $context);
         $plugin->unset_connection_token();
         // Show headings and menus of page.
-        $PAGE->set_url($thispageurl);
+        $PAGE->set_url($interactionurl);
         $PAGE->set_title(format_string($cm->name));
         $PAGE->set_heading($course->fullname);
         // Print the page header.

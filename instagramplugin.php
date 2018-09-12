@@ -25,11 +25,10 @@
  */
 namespace mod_msocial\connector;
 
-use instagram\instagram as instagram;
 use mod_msocial\kpi_info;
-use msocial\msocial_plugin;
 use mod_msocial\social_user;
 use mod_msocial\users_struct;
+use msocial\msocial_plugin;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -396,10 +395,22 @@ class msocial_connector_instagram extends msocial_connector_plugin {
             $DB->insert_record('msocial_instagram_tokens', $token);
         }
     }
-
+    /**
+     *
+     * {@inheritDoc}
+     * @see \msocial\msocial_plugin::reset_userdata()
+     */
+    public function reset_userdata($data) {
+        // Forget user tokens.
+        $this->unset_connection_token();
+        // Remove mapusers.
+        global $DB;
+        $msocial = $this->msocial;
+        $DB->delete_records('msocial_mapusers',['msocial' => $msocial->id, 'type' => $this->get_subtype()]);
+        return array('component'=>$this->get_name(), 'item'=>get_string('unlinksocialaccount', 'msocial'), 'error'=>false);
+    }
     public function unset_connection_token() {
         global $DB;
-        parent::unset_connection_token();
         $DB->delete_records('msocial_instagram_tokens', array('msocial' => $this->msocial->id));
     }
 
