@@ -418,7 +418,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /** Obtiene el numero de reacciones recibidas en el Post, y actaliza el "score" de
      * la persona que escribio el Post
      *
-     * @param GraphNode $post instagram post. */
+     * @param mixed $post instagram post. */
     protected function process_post($post) {
         list($postname, $postid) = $this->userinstagramidfor($post);
         $postinteraction = new social_interaction();
@@ -489,7 +489,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * El Comment no se registrará como interacción ni se actualizará el "score" de la persona si
      * este es demasiado corto.
      *
-     * @param GraphNode $comment
+     * @param mixed $comment
      * @param social_interaction $post */
     protected function process_comment($comment, $postinteraction) {
         $tooshort = $this->is_short_comment($comment->getField('message'));
@@ -641,7 +641,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                     mtrace("<li>Analysing " . count($comments->data) . " comments for user $token->username. ");
                                     foreach ($comments->data as $comment) {
                                         $commentinteraction = $this->process_comment($comment, $postinteraction);
-                                        /* @var $subcomment instagram\GraphNodes\GraphEdge */
+                                        /* @var $subcomment mixed */
                                         $subcomments = $comment->getField('comments');
                                         if ($subcomments) {
                                             foreach ($subcomments as $subcomment) {
@@ -752,7 +752,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                         if ($comments) {
                             foreach ($comments as $comment) {
                                 $commentinteraction = $this->process_comment($comment, $postinteraction);
-                                /* @var $subcomment instagram\GraphNodes\GraphEdge */
+                                /* @var mixed $subcomment  */
                                 $subcomments = $comment->getField('comments');
                                 if ($subcomments) {
                                     foreach ($subcomments as $subcomment) {
@@ -768,7 +768,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                         if ($likes) {
                             foreach ($likes as $like) {
                                 $likeinteraction = $this->process_reactions($like, $postinteraction);
-                                /* @var $subcomment instagram\GraphNodes\GraphEdge */
                             }
                         }
                     }

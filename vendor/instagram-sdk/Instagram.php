@@ -245,8 +245,8 @@ class Instagram {
      * @param float $lat Latitude of the center search coordinate
      * @param float $lng Longitude of the center search coordinate
      * @param int $distance Distance in metres (default is 1km (distance=1000), max. is 5km)
-     * @param long $minTimestamp Media taken later than this timestamp (default: 5 days ago)
-     * @param long $maxTimestamp Media taken earlier than this timestamp (default: now)
+     * @param int $minTimestamp Media taken later than this timestamp (default: 5 days ago)
+     * @param int $maxTimestamp Media taken earlier than this timestamp (default: now)
      *
      * @return mixed */
     public function searchMedia($lat, $lng, $distance = 1000, $minTimestamp = null, $maxTimestamp = null) {
