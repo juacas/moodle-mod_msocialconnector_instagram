@@ -400,7 +400,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * {@inheritDoc}
      * @see \msocial\msocial_plugin::reset_userdata()
      */
-    public function reset_userdata($data) {
+    public function reset_userdata(\stdClass $data) {
         // Forget user tokens.
         $this->unset_connection_token();
         // Remove mapusers.
