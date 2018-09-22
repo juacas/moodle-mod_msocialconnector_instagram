@@ -31,10 +31,9 @@ require_once('vendor/instagram-sdk/Instagram.php');
 require_once("../../../../config.php");
 require_once('../../classes/msocialconnectorplugin.php');
 require_once('instagramplugin.php');
-global $CFG;
+global $CFG, $SESSION;
 
-
-$id = optional_param('id', isset($SESSION->msocialfacebookSSOid) ? $SESSION->msocialSSOid : null, PARAM_INT); // MSocial module instance.
+$id = optional_param('id', isset($SESSION->msocialSSOid) ? $SESSION->msocialSSOid : null, PARAM_INT); // MSocial module instance.
 if (!isset($id)) {
     $id = required_param('id', PARAM_INT); // Provoke error.
 }
