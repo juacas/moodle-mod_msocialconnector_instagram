@@ -31,7 +31,7 @@ require_once('vendor/instagram-sdk/Instagram.php');
 require_once("../../../../config.php");
 require_once('../../classes/msocialconnectorplugin.php');
 require_once('instagramplugin.php');
-global $CFG, $SESSION;
+global $DB, $SESSION;
 
 $id = optional_param('id', isset($SESSION->msocialSSOid) ? $SESSION->msocialSSOid : null, PARAM_INT); // MSocial module instance.
 if (!isset($id)) {
@@ -61,7 +61,7 @@ if ($action == 'connect') {
             array('id' => $id, 'action' => 'callback', 'type' => $type));
     $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
     $ig = new Instagram($config);
-    $loginurl = $ig->getLoginUrl(['basic']);
+    $loginurl = $ig->getLoginUrl(['basic', 'comments']);
     // JPC: 2018-09-21 Instagram aparently began to include URL params as part of the redirect white-list patterns. Use session for id.
     $SESSION->msocialSSOid = $id;
     header("Location: $loginurl");

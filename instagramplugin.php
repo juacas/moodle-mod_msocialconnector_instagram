@@ -203,7 +203,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * @global \core_renderer $OUTPUT
      * @global \moodle_database $DB */
     public function render_header() {
-        global $OUTPUT, $DB, $USER;
+        global $OUTPUT, $USER;
         $notifications = [];
         $messages = [];
         if ($this->is_enabled()) {
@@ -309,6 +309,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      *
      * @see \msocial\msocial_plugin::get_kpi_list() */
     public function get_kpi_list() {
+        $kpiobjs = [];
         $kpiobjs['igposts'] = new kpi_info('igposts', get_string('kpi_description_igposts', 'msocialconnector_instagram'),
                 kpi_info::KPI_INDIVIDUAL, kpi_info::KPI_CALCULATED,
                 social_interaction::POST, 'POST', social_interaction::DIRECTION_AUTHOR);
@@ -332,7 +333,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * @global $CFG
      * @return string */
     private function get_appid() {
-        global $CFG;
         $appid = get_config('msocialconnector_instagram', 'appid');
         return $appid;
     }
@@ -341,7 +341,6 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * @global $CFG
      * @return string */
     private function get_appsecret() {
-        global $CFG;
         $appsecret = get_config('msocialconnector_instagram', 'appsecret');
         return $appsecret;
     }
@@ -463,21 +462,25 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     }
 
     /**
-     * @param mixed $mention
+     * @param mixed $usermentioned
      * @param social_interaction $parentinteraction */
-    protected function process_mention($mention, $parentinteraction) {
+    protected function process_mention($usermentioned, $parentinteraction) {
         $nativetype = 'userinphoto';
-        $mentioninguserid = $mention->id;
+        // $mention->id is missing now: use username as id.
+        $mentioninguserid = $this->get_socialuserid_from_socialname($usermentioned->username);
+        if ($mentioninguserid === null) {
+            $mentioninguserid = $usermentioned->username;
+        }
         $mentioninteraction = new social_interaction();
         $mentioninteraction->fromid = $this->get_userid($mentioninguserid);
-        $mentioninteraction->nativefrom = $mention->id;
-        $mentioninteraction->nativefromname = $mention->username;
+        $mentioninteraction->nativefrom = $mentioninguserid;
+        $mentioninteraction->nativefromname = $usermentioned->username;
         $mentioninteraction->uid = $parentinteraction->uid . '-' . $mentioninteraction->nativefrom;
         $mentioninteraction->parentinteraction = $parentinteraction->uid;
         $mentioninteraction->nativeto = $parentinteraction->nativefrom;
         $mentioninteraction->toid = $parentinteraction->fromid;
         $mentioninteraction->nativetoname = $parentinteraction->nativefromname;
-        $mentioninteraction->rawdata = json_encode($mention);
+        $mentioninteraction->rawdata = json_encode($usermentioned);
         $mentioninteraction->timestamp = null;
         $mentioninteraction->type = social_interaction::MENTION;
         $mentioninteraction->nativetype = $nativetype;
@@ -492,24 +495,30 @@ class msocial_connector_instagram extends msocial_connector_plugin {
      * @param mixed $comment
      * @param social_interaction $post */
     protected function process_comment($comment, $postinteraction) {
-        $tooshort = $this->is_short_comment($comment->getField('message'));
+        $tooshort = $this->is_short_comment($comment->text);
 
         // Si el comentario es mayor de dos palabras...
         if (!$tooshort) {
             // TODO: manage auto-messaging activity.
-            $commentid = $comment->from->id;
-            $comentname = $coment->from->username;
+            // Currently, Instagram does not report native fromid: use username.
+            $commentorname = $comment->from->username;
+            $commentorid = $this->get_socialuserid_from_socialname($commentorname);
+            if ($commentorid === null) {
+                $commentorid = $comment->from->username;
+            }
             $commentinteraction = new social_interaction();
             $commentinteraction->uid = $comment->id;
-            $commentinteraction->fromid = $this->get_userid($commentid);
-            $commentinteraction->nativefromname = $commentname;
-            $commentinteraction->nativefrom = $commentid;
+            $commentinteraction->fromid = $this->get_userid($commentorid);
+            $commentinteraction->nativefromname = $commentorname;
+            $commentinteraction->nativefrom = $commentorid;
             $commentinteraction->toid = $postinteraction->fromid;
             $commentinteraction->nativeto = $postinteraction->nativefrom;
             $commentinteraction->nativetoname = $postinteraction->nativefromname;
             $commentinteraction->parentinteraction = $postinteraction->uid;
             $commentinteraction->rawdata = json_encode($comment);
-            $commentinteraction->timestamp = new \DateTime($comment->created_time);
+            $date = new \DateTime();
+            $date->setTimestamp($comment->created_time);
+            $commentinteraction->timestamp = $date;
             $commentinteraction->type = social_interaction::REPLY;
             $commentinteraction->nativetype = "comment";
             $commentinteraction->description = $comment->text;
@@ -642,16 +651,16 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                                     foreach ($comments->data as $comment) {
                                         $commentinteraction = $this->process_comment($comment, $postinteraction);
                                         /* @var $subcomment mixed */
-                                        $subcomments = $comment->getField('comments');
-                                        if ($subcomments) {
-                                            foreach ($subcomments as $subcomment) {
-                                                $this->process_comment($subcomment, $commentinteraction);
-                                            }
-                                        }
+//                                         $subcomments = $comment->getField('comments');
+//                                         if ($subcomments) {
+//                                             foreach ($subcomments as $subcomment) {
+//                                                 $this->process_comment($subcomment, $commentinteraction);
+//                                             }
+//                                         }
                                     }
                                 }
                             } else {
-                                mtrace("<li>Can't retrieve list of comments for user $token->username for post $post->id,  ");
+                                mtrace("<li>Can't retrieve list of comments for user $token->username for post $post->id. Error: " . $comments->meta->error_message);
                             }
                         }
                         $this->iglikes[$token->userid] += $post->likes->count;
