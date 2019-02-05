@@ -26,9 +26,9 @@
 namespace mod_msocial\connector;
 
 use mod_msocial\kpi_info;
+use mod_msocial\msocial_plugin;
 use mod_msocial\social_user;
 use mod_msocial\users_struct;
-use msocial\msocial_plugin;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -57,7 +57,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      *
      * {@inheritDoc}
-     * @see \msocial\msocial_plugin::can_harvest()
+     * @see \mod_msocial\msocial_plugin::can_harvest()
      */
     public function can_harvest() {
         $igsearch = $this->get_config(self::CONFIG_IGSEARCH);
@@ -98,7 +98,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::calculate_kpis() */
+     * @see \mod_msocial\msocial_plugin::calculate_kpis() */
     public function calculate_kpis(users_struct $users, $kpis = []) {
         $kpis = parent::calculate_kpis($users, $kpis);
         // Calculate stats igreplies and igcomments from interactions if needed.
@@ -155,7 +155,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::get_settings() */
+     * @see \mod_msocial\msocial_plugin::get_settings() */
     public function get_settings(\MoodleQuickForm $mform) {
         $formfieldname = $this->get_form_field_name(self::CONFIG_IGSEARCH);
         $mform->addElement('text', $formfieldname, get_string("igsearch", "msocialconnector_instagram"), array('size' => '20'));
@@ -166,7 +166,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::data_preprocessing() */
+     * @see \mod_msocial\msocial_plugin::data_preprocessing() */
     public function data_preprocessing(&$defaultvalues) {
         $defaultvalues[$this->get_form_field_name(self::CONFIG_IGSEARCH)] = $this->get_config(self::CONFIG_IGSEARCH);
         parent::data_preprocessing($defaultvalues);
@@ -175,7 +175,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::save_settings() */
+     * @see \mod_msocial\msocial_plugin::save_settings() */
     public function save_settings(\stdClass $data) {
         if (isset($data->{$this->get_form_field_name(self::CONFIG_IGSEARCH)})) {
             $this->set_config(self::CONFIG_IGSEARCH, $data->{$this->get_form_field_name(self::CONFIG_IGSEARCH)});
@@ -307,7 +307,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      * {@inheritdoc}
      *
-     * @see \msocial\msocial_plugin::get_kpi_list() */
+     * @see \mod_msocial\msocial_plugin::get_kpi_list() */
     public function get_kpi_list() {
         $kpiobjs = [];
         $kpiobjs['igposts'] = new kpi_info('igposts', get_string('kpi_description_igposts', 'msocialconnector_instagram'),
@@ -397,7 +397,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
     /**
      *
      * {@inheritDoc}
-     * @see \msocial\msocial_plugin::reset_userdata()
+     * @see \mod_msocial\msocial_plugin::reset_userdata()
      */
     public function reset_userdata(\stdClass $data) {
         // Forget user tokens.
