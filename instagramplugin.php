@@ -711,7 +711,8 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 }
             }
         }
-        return $this->post_harvest($result);
+        $result->interactions = $this->lastinteractions;
+        return $result;
     }
 
     private function harvest_tags() {
@@ -802,6 +803,7 @@ class msocial_connector_instagram extends msocial_connector_plugin {
                 $result->messages[] = $message;
             }
         }
-        return $this->post_harvest($result);
+        $result->interactions = $this->lastinteractions;
+        return $result;
     }
 }
