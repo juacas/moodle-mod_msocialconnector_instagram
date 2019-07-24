@@ -806,4 +806,25 @@ class msocial_connector_instagram extends msocial_connector_plugin {
         $result->interactions = $this->lastinteractions;
         return $result;
     }
+     /**
+     * @param social_interaction $interaction interaction to check.
+     * @param social_interaction[] Other interactions for check relations. indexed by uuid.
+     */
+    public function check_condition(social_interaction $interaction, array $otherinteractions = null) {
+        if (parent::check_condition($interaction, $otherinteractions) === false) {
+            return false;
+        }
+        // If has a parent the conditions are inherited.
+        if (isset($otherinteractions[$interaction->parentinteraction])) {
+            return $this->check_condition($otherinteractions[$interaction->parentinteraction], $otherinteractions);
+        } else if ($interaction->type == social_interaction::POST) {
+            $post = json_decode($interaction->rawdata);
+            $content = $post->caption->text;
+            $tagparser = new \tag_parser($this->hashtag);
+            return $tagparser->check_hashtaglist($content);
+        } else {
+            // If the interaction is not a post and have a parent then it is an orphan interactions.
+            return false;
+        }
+    }
 }
