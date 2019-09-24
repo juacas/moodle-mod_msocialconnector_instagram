@@ -61,7 +61,8 @@ if ($action == 'connect') {
             array('id' => $id, 'action' => 'callback', 'type' => $type));
     $config = array('apiKey' => $appid, 'apiSecret' => $appsecret, 'apiCallback' => $callbackurl->out(false));
     $ig = new Instagram($config);
-    $loginurl = $ig->getLoginUrl(['basic', 'comments']);
+    $igprofile = ['basic']; // Instagram no longer accept 'comments' profile.
+    $loginurl = $ig->getLoginUrl($igprofile);
     // JPC: 2018-09-21 Instagram aparently began to include URL params as part of the redirect white-list patterns. Use session for id.
     $SESSION->msocialSSOid = $id;
     header("Location: $loginurl");
