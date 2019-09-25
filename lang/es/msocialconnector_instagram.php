@@ -31,7 +31,9 @@ $string['pluginname'] = 'Conector para Instagram';
 $string['igsearch'] = 'Lista de tags (separados por comas). Un * significa que se aceptan todos.';
 $string['igsearch_empty'] = 'Falta la lista de tags. Introdúzcala en la <a href="../../course/modedit.php?update={$a->cmid}&return=1">configuración de MSocial</a>.';
 $string['igsearch_help'] = 'Se ignoran los posts que no tengan todas las etiquetas de la lista. Si se desea analizar todos los posts introduzca el carácter asterisco "*" en este campo.' .
-                            'Tenga en cuenta que analizar excesivos mensajes puede dificultar la interpretación de los resultados.';
+                            'Tenga en cuenta que analizar excesivos mensajes puede dificultar la interpretación de los resultados.' .
+                            'Se pueden utilizar AND y OR. OR tiene precedencia hacia la izquierda. ' . 
+                            'Por ejemplo: "#uva AND #msocial OR #m_social" incluiría mensajes con los tags "#uva #m_social", "#uva #msocial" pero no "#msocial" ni "#m_social" ni "#uva".';
 $string['igsearchingby'] = 'Filtrando por etiquetas: "{$a}"';
 $string['harvest'] = 'Buscar la actividad de los estudiantes.';
 

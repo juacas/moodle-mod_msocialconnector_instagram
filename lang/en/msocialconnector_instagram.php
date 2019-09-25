@@ -30,7 +30,10 @@
 $string['pluginname'] = 'Instagram Connector';
 $string['igsearch'] = 'Tag list (separated by "," ) to search for in Instagram Posts. An "*" means that all posts are accepted';
 $string['igsearch_empty'] = 'Search term absent. Configure it in this activity <a href="../../course/modedit.php?update={$a->cmid}&return=1">settings</a>.';
-$string['igsearch_help'] = 'If specified, only media published with the specific tag is collected for analysis. If you wish to analyze all the posts enter "*" in this field. This field admits a list of tags separated by "," or an expression with AND and OR like ' .
+$string['igsearch_help'] = 'If specified, only media published with the specific tag is collected for analysis. If you wish to analyze all the posts enter "*" in this field. ' .
+                            'This field admits a list of tags separated by "," or an expression with AND and OR. ' .
+                            'It can be a list of tags with AND and OR. OR takes precedence to the left. ' . 
+                            'I.e: "#uva AND #msocial OR #m_social" matches messages with the tags "#uva #m_social", "#uva #msocial" but not "#msocial", "#m_social", "#uva". ' .
                             'Please bear in mind that retrieving too much, unrelated, posts may obscure the analysis.';
 $string['igsearchingby'] = 'Filtering by tags: "{$a}"';
 $string['harvest'] = 'Search instagram groups for student activity';
